@@ -60,7 +60,7 @@ export default function App() {
       <header className="site-header flex items-center justify-between gap-4">
         <a
           className="wordmark flex items-center gap-3"
-          href="/"
+          href={import.meta.env.BASE_URL}
           aria-label="Neon Tasks Startseite"
         >
           <span className="brand-symbol" aria-hidden="true">
@@ -238,7 +238,7 @@ export default function App() {
           <div className="city-art">
             <div className="orbit orbit-one" />
             <div className="orbit orbit-two" />
-            <img src="/neon-city.svg" alt="" />
+            <img src={`${import.meta.env.BASE_URL}neon-city.svg`} alt="" />
             <span className="art-coordinate">52° 31′ N / 13° 24′ E</span>
           </div>
           <div className="city-caption">
