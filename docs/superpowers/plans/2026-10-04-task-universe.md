@@ -32,10 +32,10 @@
 
 **Interfaces:** `TaskUniverse({tasks, selectedId, onSelect, effectsEnabled, pulse, onReady})`; tasks haben unverändert `{id,text,completed}`. `pulse` ist optional `{id,kind,sequence}`. `onSelect(id)` wählt eine echte Aufgabe. `onReady(boolean)` meldet den Grafikzustand. Wrapper besitzt projizierte, zugängliche Label-Schaltflächen.
 
-- [ ] Layoutprüfungen zuerst schreiben und Fehlschlag beobachten: leere Eingabe ergibt keine Aufgabenobjekte; mehr als zwölf Aufgaben bleiben auf zwölf begrenzt; Positionen sind endlich und deterministisch; IDs bleiben den richtigen Aufgaben zugeordnet.
-- [ ] Three.js installieren und das Scene-Modul samt eigenen Kern-/Raster-Shadern implementieren; sichtbare räumliche Aufgabenobjekte, Pointer/Touch-Auswahl und Event-Impulse.
-- [ ] Wrapper implementieren, Lifecycle und Fallback behandeln; ResizeObserver, Listener, GPU-Ressourcen und Frame-Schleife vollständig aufräumen.
-- [ ] `npm test` und `npm run build` prüfen. Testskript erweitert auf Speicher- und Layoutprüfungen. Commit und Bericht mit Schnittstelle anfertigen.
+- [x] Layoutprüfungen zuerst schreiben und Fehlschlag beobachten: leere Eingabe ergibt keine Aufgabenobjekte; mehr als zwölf Aufgaben bleiben auf zwölf begrenzt; Positionen sind endlich und deterministisch; IDs bleiben den richtigen Aufgaben zugeordnet.
+- [x] Three.js installieren und das Scene-Modul samt eigenen Kern-/Raster-Shadern implementieren; sichtbare räumliche Aufgabenobjekte, Pointer/Touch-Auswahl und Event-Impulse.
+- [x] Wrapper implementieren, Lifecycle und Fallback behandeln; ResizeObserver, Listener, GPU-Ressourcen und Frame-Schleife vollständig aufräumen.
+- [x] `npm test` und `npm run build` prüfen. Testskript erweitert auf Speicher- und Layoutprüfungen. Commit und Bericht mit Schnittstelle anfertigen.
 
 ### Task 2: Progressive Aufgabenoberfläche und Integration
 
@@ -43,12 +43,12 @@
 
 **Interfaces:** Verwendet `TaskUniverse` aus Task 1; React besitzt Aufgaben, Filter, Auswahl, Effekte und Ereignis-Sequenz. Lazy/Suspense und Error Boundary halten die Liste bei Grafikfehlern nutzbar.
 
-- [ ] Die mobile und Desktop-Komposition neu gestalten: experimentelle Typografie, Neon-Materialien, räumliche Bühne, klare Liste und Eingabe; Tailwind-Utilities und lesbare CSS-Dateien verwenden.
-- [ ] Bestehenden Aufgabenfluss erhalten, Raum-Auswahl mit Liste synchronisieren, Erledigen mit Impuls verbinden und Effektschalter inklusive reduced-motion initialisieren.
-- [ ] Alle Prüfungen und Build ausführen; Produktionspreview unter `/neon-tasks/` im Browser prüfen: echte WebGL-Szene, Raum-Auswahl, Aufgabenfluss, Neuladen, 320/390 Pixel, große Liste, lange Texte, Tastatur, Fallback und Effekte aus.
-- [ ] Screenshots und aussagekräftige Prüfergebnisse speichern, README aktualisieren, Commit und Bericht erstellen.
+- [x] Die mobile und Desktop-Komposition neu gestalten: experimentelle Typografie, Neon-Materialien, räumliche Bühne, klare Liste und Eingabe; Tailwind-Utilities und lesbare CSS-Dateien verwenden.
+- [x] Bestehenden Aufgabenfluss erhalten, Raum-Auswahl mit Liste synchronisieren, Erledigen mit Impuls verbinden und Effektschalter inklusive reduced-motion initialisieren.
+- [x] Alle Prüfungen und Build ausführen; Produktionspreview unter `/neon-tasks/` im Browser prüfen: echte WebGL-Szene, Raum-Auswahl, Aufgabenfluss, Neuladen, 320/390 Pixel, große Liste, lange Texte, Tastatur, Fallback und Effekte aus.
+- [x] Screenshots und aussagekräftige Prüfergebnisse speichern, README aktualisieren, Commit und Bericht erstellen.
 
 ### Abschluss
-- [ ] Unabhängige Gesamtprüfung und nötige Korrekturen durchführen.
+- [x] Unabhängige Gesamtprüfung und nötige Korrekturen durchführen.
 - [ ] Geprüften Stand auf `main` integrieren, über den verfügbaren GitHub-Zugang übertragen und erfolgreichen Pages-Workflow abwarten.
 - [ ] Live-App im Browser überprüfen und URL melden.

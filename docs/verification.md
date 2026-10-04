@@ -16,3 +16,16 @@ Ruling: Use subagent-driven execution — explicit user instruction supersedes p
 Ruling: Skill helper scripts are unavailable as local executables — equivalent task briefs and review files are written locally — same review scope.
 
 Die Arbeit verbleibt im neuen lokalen Branch `feat/cyberpunk-todo`; es existiert kein ursprünglicher Hauptbranch und kein Remote. Die Prüfberichte sind lokal in `artifacts/sdd-history/` archiviert.
+
+## Task Universe — 3D-Version
+
+- Three.js0.186 mit eigenen Kern- und Raster-Shadern; lazy geladenes Szenenmodul.
+-21 Speicher-/Layoutprüfungen und Produktionsbuild bestanden.
+- Echte WebGL-Browserprüfung: Auswahl im Raum, Fokus, Erledigen, Wiederöffnen, Löschen, Filter und Speicherung nach Neuladen.
+- Mobile320/390,25 Aufgaben bei12 Szenenlabels, lange Texte und Tastatur geprüft; kein horizontaler Überlauf.
+- Bewegung aus und explizites Einschalten bei reduced-motion geprüft; Callback-Drosselung mit reproduzierbarem Browser-Regressionscheck bestätigt.
+- Kontextverlust und WebGL-Ausfall lassen die Aufgabensteuerung nutzbar; leere und gefüllte Ansicht ohne erkannte Axe-Verstöße.
+- Unabhängige Szenen-, UI- und Gesamtprüfung abgeschlossen. Keine offenen Critical-/Important-Befunde.
+- Nicht blockierende Hinweise: GPU-Objekte werden teils unnötig neu aufgebaut; Diagnoseflag kann nach späterem Boundary-Fehler veraltet sein; zwölf Labels können auf kleinen Bühnen überlappen. Die vollständige Liste bleibt erreichbar.
+
+Arbeitsentscheidungen für diese Version werden im Entwurf und im lokalen Prüfarchiv aufgezeichnet: freie autonome Gestaltung, Feature-Branch zur Isolation, begrenzte Labels an den Bühnenrändern und Veröffentlichung mit den genannten kleinen Optimierungsmöglichkeiten.
