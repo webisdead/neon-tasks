@@ -77,8 +77,12 @@ export function TaskUniverse({
                 onClick={() => onSelect?.(task.id)}
                 style={{
                   position: "absolute",
-                  left: position?.x ?? "50%",
-                  top: position?.y ?? "50%",
+                  left: position
+                    ? `clamp(83px, ${position.x}px, calc(100% - 83px))`
+                    : "50%",
+                  top: position
+                    ? `clamp(24px, ${position.y}px, calc(100% - 24px))`
+                    : "50%",
                   transform: "translate(-50%, -50%)",
                   pointerEvents: "auto",
                   minHeight: 44,

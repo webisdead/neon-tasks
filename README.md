@@ -1,6 +1,8 @@
 # NEON / TASKS
 
-Eine mobile-first To-do-Liste mit deutscher Oberfläche, Neon-Akzenten und einer lokalen isometrischen SVG-Pixelstadt. Aufgaben hinzufügen (Enter oder Plus), abhaken, wieder öffnen, löschen und mit Alle / Offen / Erledigt filtern.
+Eine mobile-first 3D-To-do-Liste mit deutscher Oberfläche, Three.js und eigenen GLSL-Shadern. Ein kristalliner Kern, Partikel und ein räumlicher Orbit visualisieren bis zu zwölf echte Aufgaben. Raum und Liste teilen dieselbe Auswahl; die Fokusansicht erlaubt direktes Erledigen und Wiederöffnen. Alle Aufgaben bleiben in der Liste erreichbar. Aufgaben hinzufügen (Enter oder Plus), abhaken, wieder öffnen, löschen und mit Alle / Offen / Erledigt filtern.
+
+Bewegung startet gemäß `prefers-reduced-motion` und lässt sich mit dem sichtbaren Schalter ausdrücklich an- oder ausschalten. Ohne WebGL, bei Kontextverlust oder beim Fehler des lazy geladenen Grafikmoduls bleiben Eingabe und Aufgabenliste nutzbar. Die Szene pausiert im Hintergrund, begrenzt die Pixeldichte auf 1.5 und aktualisiert projizierte Labels höchstens 12.5-mal pro Sekunde. Keine externen Grafik-Assets.
 
 ## Start
 
