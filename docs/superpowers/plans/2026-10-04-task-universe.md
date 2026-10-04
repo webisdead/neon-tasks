@@ -50,5 +50,5 @@
 
 ### Abschluss
 - [x] Unabhängige Gesamtprüfung und nötige Korrekturen durchführen.
-- [ ] Geprüften Stand auf `main` integrieren, über den verfügbaren GitHub-Zugang übertragen und erfolgreichen Pages-Workflow abwarten.
-- [ ] Live-App im Browser überprüfen und URL melden.
+- [x] Geprüften Stand auf `main` integrieren, über den verfügbaren GitHub-Zugang übertragen und erfolgreichen Pages-Workflow abwarten.
+- [x] Live-App im Browser überprüfen und URL melden.

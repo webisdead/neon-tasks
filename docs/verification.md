@@ -29,3 +29,5 @@ Die Arbeit verbleibt im neuen lokalen Branch `feat/cyberpunk-todo`; es existiert
 - Nicht blockierende Hinweise: GPU-Objekte werden teils unnötig neu aufgebaut; Diagnoseflag kann nach späterem Boundary-Fehler veraltet sein; zwölf Labels können auf kleinen Bühnen überlappen. Die vollständige Liste bleibt erreichbar.
 
 Arbeitsentscheidungen für diese Version werden im Entwurf und im lokalen Prüfarchiv aufgezeichnet: freie autonome Gestaltung, Feature-Branch zur Isolation, begrenzte Labels an den Bühnenrändern und Veröffentlichung mit den genannten kleinen Optimierungsmöglichkeiten.
+
+Live-Veröffentlichung: GitHub Actions-Lauf https://github.com/webisdead/neon-tasks/actions/runs/37193476869 erfolgreich. Live-Browser https://webisdead.github.io/neon-tasks/ zeigt die neue Oberfläche mit echtem WebGL2 und bereiter Szene. Auswahl im Raum, Erledigen und gespeicherter Status nach Neuladen bestätigt;390 Pixel ohne Überlauf und keine erkannten Laufzeitfehler. Testaufgabe anschließend gelöscht.
