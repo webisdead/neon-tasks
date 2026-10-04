@@ -15,15 +15,6 @@ export function TaskUniverse({
   latest.current = { onSelect, onReady };
   const [positions, setPositions] = useState([]);
   const [ready, setReady] = useState(false);
-  const [reduced, setReduced] = useState(
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  );
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const change = () => setReduced(media.matches);
-    media.addEventListener("change", change);
-    return () => media.removeEventListener("change", change);
-  }, []);
   useEffect(() => {
     try {
       controller.current = createUniverse(host.current, {
@@ -48,10 +39,10 @@ export function TaskUniverse({
     controller.current?.update({
       tasks,
       selectedId,
-      effectsEnabled: effectsEnabled && !reduced,
+      effectsEnabled,
       pulse,
     });
-  }, [tasks, selectedId, effectsEnabled, reduced, pulse]);
+  }, [tasks, selectedId, effectsEnabled, pulse]);
   const visibleTasks = tasks.slice(0, 12);
   return (
     <div

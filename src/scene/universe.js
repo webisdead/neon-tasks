@@ -206,6 +206,20 @@ export function createUniverse(host, callbacks) {
     });
   }
   function project() {
+    if (disposed || lost || document.hidden) return;
+    const now = performance.now();
+    const remaining = 80 - (now - lastProjection);
+    if (remaining > 0) {
+      if (!projectionTimer)
+        projectionTimer = setTimeout(() => {
+          projectionTimer = 0;
+          project();
+        }, Math.ceil(remaining));
+      return;
+    }
+    clearTimeout(projectionTimer);
+    projectionTimer = 0;
+    lastProjection = now;
     const p = new THREE.Vector3();
     callbacks.onPositions(
       nodes.map((n) => {
@@ -254,21 +268,7 @@ export function createUniverse(host, callbacks) {
       particleGeometry.attributes.position.needsUpdate = true;
     }
     renderer.render(scene, camera);
-    if (now - lastProjection >= 80) {
-      project();
-      lastProjection = now;
-    } else if (!effects && !projectionTimer) {
-      projectionTimer = setTimeout(
-        () => {
-          projectionTimer = 0;
-          if (!disposed && !lost && !document.hidden) {
-            project();
-            lastProjection = performance.now();
-          }
-        },
-        80 - (now - lastProjection),
-      );
-    }
+    project();
     if (effects) frame = requestAnimationFrame(render);
   }
   function request() {
@@ -282,7 +282,6 @@ export function createUniverse(host, callbacks) {
     camera.aspect = width / height;
     camera.position.set(0, 0.25, width / height < 0.8 ? 10.5 : 8.1);
     camera.updateProjectionMatrix();
-    lastProjection = -Infinity;
     request();
   }
   const observer = new ResizeObserver(resize);
@@ -375,7 +374,6 @@ export function createUniverse(host, callbacks) {
       }
       cancelAnimationFrame(frame);
       frame = 0;
-      lastProjection = -Infinity;
       request();
     },
     dispose,
