@@ -164,7 +164,21 @@ try {
     maxTouchPoints: 5,
   });
   await wait();
-  await ev(`document.querySelector('.stick').addEventListener('pointerdown',event=>window.stickPointer=event.pointerId)`);
+  await ev(
+    `document.querySelector('.stick').addEventListener('pointerdown',event=>window.stickPointer=event.pointerId)`,
+  );
+  // Stay outside station targeting range: incidental target prop updates can
+  // otherwise deliver neutral input after focus and mask the recovery bug.
+  await key("KeyA");
+  for (
+    let attempts = 0;
+    attempts < 20 && Number((await pos()).split(",")[0]) > -4.5;
+    attempts++
+  )
+    await wait();
+  assert.ok(Number((await pos()).split(",")[0]) <= -4.5);
+  await ev(`window.dispatchEvent(new KeyboardEvent('keyup',{code:'KeyA'}))`);
+  await wait();
   const rect = await ev(
     `document.querySelector('.stick').getBoundingClientRect().toJSON()`,
   );
@@ -184,7 +198,12 @@ try {
   await wait();
   await quiet();
   const touchStop = await pos();
-  assert.equal(await ev(`document.querySelector('.stick').hasPointerCapture(window.stickPointer)`), false);
+  assert.equal(
+    await ev(
+      `document.querySelector('.stick').hasPointerCapture(window.stickPointer)`,
+    ),
+    false,
+  );
   assert.match(
     await ev(`document.querySelector('.stick span').style.transform`),
     /translate\(0px/,
@@ -194,8 +213,8 @@ try {
   await wait();
   assert.equal(await pos(), touchStop);
   await touch("touchEnd");
-  await touch("touchStart", rect.height / 2);
-  await touch("touchMove", 15);
+  // Fresh recovery must work without an initial neutral center sample.
+  await touch("touchStart", 15);
   await wait();
   assert.notEqual(await pos(), touchStop);
   await touch("touchEnd");
@@ -205,6 +224,36 @@ try {
     fresh: await pos(),
     coarse: await ev(`matchMedia('(pointer: coarse)').matches`),
   };
+  await touch("touchStart", rect.height - 15);
+  await wait();
+  await ev(
+    `Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'))`,
+  );
+  await wait();
+  await quiet();
+  const hiddenTouchStop = await pos();
+  await ev(
+    `delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));window.dispatchEvent(new Event('focus'))`,
+  );
+  await touch("touchMove", rect.height - 12);
+  await wait();
+  assert.equal(await pos(), hiddenTouchStop);
+  await touch("touchEnd");
+  await touch("touchStart", rect.height - 15);
+  await wait();
+  assert.notEqual(await pos(), hiddenTouchStop);
+  await touch("touchEnd");
+  outputs.hiddenTouch = { stopped: hiddenTouchStop, fresh: await pos() };
+  await click("Hilfe");
+  await wait();
+  await click("Weitergehen");
+  await wait();
+  const dialogStop = await pos();
+  await touch("touchStart", rect.height - 15);
+  await wait();
+  assert.notEqual(await pos(), dialogStop);
+  await touch("touchEnd");
+  outputs.dialogTouch = "fresh off-center gesture moves";
   console.log(JSON.stringify(outputs, null, 2));
 } finally {
   ws.close();

@@ -362,6 +362,7 @@ export function createWorld(host, initial) {
     });
     on(window, "focus", () => {
       focused = true;
+      if (!props.movement?.x && !props.movement?.y) movementBlocked = false;
       resetInput();
       wake();
     });
@@ -369,6 +370,7 @@ export function createWorld(host, initial) {
       if (document.hidden) stopAutomatically();
       else {
         focused = document.hasFocus();
+        if (!props.movement?.x && !props.movement?.y) movementBlocked = false;
         resetInput();
         wake();
       }
