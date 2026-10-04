@@ -80,7 +80,26 @@ function Modal({ title, close, children }) {
   );
 }
 function Stick({ movement, onChange }) {
-  const pointer = useRef(null);
+  const pointer = useRef(null),
+    element = useRef(null);
+  useEffect(() => {
+    function stop() {
+      const id = pointer.current;
+      pointer.current = null;
+      if (id !== null && element.current?.hasPointerCapture(id))
+        element.current.releasePointerCapture(id);
+      onChange({ x: 0, y: 0 });
+    }
+    function hidden() {
+      if (document.hidden) stop();
+    }
+    window.addEventListener("blur", stop);
+    document.addEventListener("visibilitychange", hidden);
+    return () => {
+      window.removeEventListener("blur", stop);
+      document.removeEventListener("visibilitychange", hidden);
+    };
+  }, [onChange]);
   function move(event) {
     if (pointer.current !== event.pointerId) return;
     const rect = event.currentTarget.getBoundingClientRect();
@@ -91,11 +110,13 @@ function Stick({ movement, onChange }) {
   }
   function reset(event) {
     event.stopPropagation();
+    if (pointer.current !== event.pointerId) return;
     pointer.current = null;
     onChange({ x: 0, y: 0 });
   }
   return (
     <div
+      ref={element}
       className="stick"
       role="group"
       aria-label="Bewegungsstick"
@@ -161,7 +182,6 @@ export default function App() {
   useEffect(() => {
     function stop() {
       setMovement({ x: 0, y: 0 });
-      if (entered) setDialog((current) => current ?? "pause");
     }
     function hidden() {
       if (document.hidden) stop();
@@ -172,7 +192,7 @@ export default function App() {
       window.removeEventListener("blur", stop);
       document.removeEventListener("visibilitychange", hidden);
     };
-  }, [entered]);
+  }, []);
   useEffect(() => {
     function escape(event) {
       if (event.code === "Escape" && entered && !dialog) event.preventDefault();
@@ -510,7 +530,7 @@ export default function App() {
                 </div>
                 <div>
                   <dt>Pause</dt>
-                  <dd>Escape · Fokuswechsel</dd>
+                  <dd>Escape · Pause-Taste</dd>
                 </div>
               </dl>
               <button

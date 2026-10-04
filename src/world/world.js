@@ -20,6 +20,8 @@ export function createWorld(host, initial) {
     sequence,
     pulse,
     intentionalUnlock = false,
+    ownedPointerLock = false,
+    focused = document.hasFocus(),
     movementBlocked = false;
   const keys = new Set(),
     stations = new Map(),
@@ -272,7 +274,7 @@ export function createWorld(host, initial) {
       });
     }
     const active = () =>
-      props.entered && !props.paused && !document.hidden && !lost;
+      props.entered && !props.paused && focused && !document.hidden && !lost;
     const resetInput = () => {
       keys.clear();
       drag = null;
@@ -339,6 +341,7 @@ export function createWorld(host, initial) {
         ].includes(event.code)
       ) {
         event.preventDefault();
+        if (event.repeat && !keys.has(event.code)) return;
         keys.add(event.code);
         wake();
       }
@@ -346,29 +349,40 @@ export function createWorld(host, initial) {
     on(window, "keyup", (event) => {
       keys.delete(event.code);
     });
-    on(window, "blur", () => {
+    function stopAutomatically() {
       movementBlocked = true;
       resetInput();
-      if (active()) props.onPause?.();
+      releasePointer();
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+    }
+    on(window, "blur", () => {
+      focused = false;
+      stopAutomatically();
+    });
+    on(window, "focus", () => {
+      focused = true;
+      resetInput();
+      wake();
     });
     on(document, "visibilitychange", () => {
-      resetInput();
-      if (document.hidden) {
-        movementBlocked = true;
-        if (props.entered && !props.paused) props.onPause?.();
-        if (frame) cancelAnimationFrame(frame);
-        frame = 0;
-      } else wake();
+      if (document.hidden) stopAutomatically();
+      else {
+        focused = document.hasFocus();
+        resetInput();
+        wake();
+      }
     });
     on(document, "pointerlockchange", () => {
-      if (document.pointerLockElement !== canvas) {
-        resetInput();
-        if (intentionalUnlock) {
-          intentionalUnlock = false;
-          return;
-        }
-        if (active()) props.onPause?.();
-      }
+      const owned = document.pointerLockElement === canvas;
+      const lostOwnership = ownedPointerLock && !owned;
+      ownedPointerLock = owned;
+      if (owned) intentionalUnlock = false;
+      if (!lostOwnership) return;
+      resetInput();
+      const intentional = intentionalUnlock;
+      intentionalUnlock = false;
+      if (!intentional && active()) props.onPause?.();
     });
     on(canvas, "pointerdown", (event) => {
       if (!active()) return;
@@ -436,7 +450,7 @@ export function createWorld(host, initial) {
     }
     function draw(now) {
       frame = 0;
-      if (disposed || lost || document.hidden) return;
+      if (disposed || lost || document.hidden || !focused) return;
       const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
       last = now;
       let moving = false;
@@ -495,7 +509,7 @@ export function createWorld(host, initial) {
         frame = requestAnimationFrame(draw);
     }
     function wake() {
-      if (!frame && !disposed && !lost && !document.hidden) {
+      if (!frame && !disposed && !lost && !document.hidden && focused) {
         last = 0;
         frame = requestAnimationFrame(draw);
       }
