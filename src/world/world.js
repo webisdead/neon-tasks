@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { selectSlots, stepPosition } from './navigation.js';
-import { vertex, portalFragment, floorFragment } from './shaders.js';
+import { vertex, portalFragment, floorFragment, hologramFragment } from './shaders.js';
 
 export function createWorld(host, initial) {
   let props=initial, disposed=false, lost=false, frame=0, last=0, yaw=0, pitch=0, drag=null, target=null, sequence, pulse, intentionalUnlock=false, movementBlocked=false;
@@ -16,7 +16,8 @@ export function createWorld(host, initial) {
   const trim=own(new THREE.MeshBasicMaterial({color:'#42dfef'}));
   const violet=own(new THREE.MeshBasicMaterial({color:'#ad72ff'}));
   const shader=fragment=>own(new THREE.ShaderMaterial({vertexShader:vertex,fragmentShader:fragment,uniforms:{time:{value:0}}}));
-  const floorMat=shader(floorFragment), portalMat=shader(portalFragment);
+  const floorMat=shader(floorFragment), portalMat=shader(portalFragment), hologramMat=shader(hologramFragment);
+  hologramMat.transparent=true;hologramMat.depthWrite=false;hologramMat.side=THREE.DoubleSide;
   function mesh(geometry,material,position,scale,parent=scene){const m=new THREE.Mesh(geometry,material);m.position.set(...position);m.scale.set(...scale);parent.add(m);return m;}
   scene.add(new THREE.HemisphereLight('#a6dfff','#09101e',2)); const light=new THREE.PointLight('#9176ff',80,35);light.position.set(0,6,-20);scene.add(light);
   const floor=mesh(plane,floorMat,[0,0,-9],[20,46,1]);floor.rotation.x=-Math.PI/2;
@@ -51,7 +52,8 @@ export function createWorld(host, initial) {
     mesh(cylinder,dark,[0,.45,0],[.8,.9,.8],group);mesh(cylinder,create?violet:trim,[0,.92,0],[.83,.035,.83],group);
     const material=new THREE.MeshBasicMaterial({map:titleTexture(task.text,task.completed,create),side:THREE.DoubleSide});
     const card=mesh(plane,material,[0,1.9,0],[2.25,1.125,1],group);
-    const result={id,group,card,material,text:task.text,completed:task.completed,x,z,radius:.83,kind:create?'create':'task'};return result;
+    const hologram=mesh(plane,hologramMat,[0,1.9,.012],[2.25,1.125,1],group);
+    const result={id,group,card,hologram,material,text:task.text,completed:task.completed,x,z,radius:.83,kind:create?'create':'task'};return result;
   }
   const terminal=station(null,0,{text:'Dein nächster Schritt',completed:false},true);
   function syncTasks(){const visible=selectSlots(props.tasks||[],props.selectedId),ids=new Set(visible.map(t=>t.id));
@@ -93,12 +95,12 @@ export function createWorld(host, initial) {
       moving=!!(input.x||input.y);if(moving){const p=stepPosition(camera.position,input,yaw,dt,[terminal,...stations.values(),...architectureObstacles]);camera.position.x=p.x;camera.position.z=p.z;}
       camera.rotation.set(pitch,yaw,0);updateTarget();
     }else if(!props.entered){camera.position.set(13,11,18);camera.lookAt(0,1,-10);}
-    if(props.effectsEnabled){portalMat.uniforms.time.value=now/1000;floorMat.uniforms.time.value=now/1000;}
+    if(props.effectsEnabled){portalMat.uniforms.time.value=now/1000;floorMat.uniforms.time.value=now/1000;hologramMat.uniforms.time.value=now/1000;}
     let pulsing=false;
     for(const s of stations.values()){
       const remaining=Math.max(0,(s.pulseUntil||0)-now);pulsing ||= remaining>0;
       const scale=(s.id===props.selectedId?1.06:1)+Math.sin(remaining/650*Math.PI)*.12;
-      s.card.scale.set(2.25*scale,1.125*scale,1);
+      s.card.scale.set(2.25*scale,1.125*scale,1);s.hologram.scale.copy(s.card.scale);
     }
     canvas.dataset.cameraPosition=[camera.position.x,camera.position.y,camera.position.z].map(n=>n.toFixed(3)).join(',');
     canvas.dataset.stationCount=String(stations.size);renderer.render(scene,camera);
