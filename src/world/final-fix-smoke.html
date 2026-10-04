@@ -1,0 +1,300 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Final world regression fixture</title>
+  </head>
+  <body>
+    <div id="world" style="width: 800px; height: 400px"></div>
+    <script type="module">
+      import * as THREE from "three";
+      import { createWorld } from "./world.js";
+      const host = document.querySelector("#world");
+      const defaults = {
+        tasks: [{ id: "one", text: "Actual test task", completed: false }],
+        entered: true,
+        paused: false,
+        effectsEnabled: false,
+        movement: { x: 0, y: 0 },
+      };
+      window.runLifecycleChecks = async () => {
+        const results = [];
+        for (const stage of [
+          "renderer",
+          "partial-station",
+          "listeners",
+          "observer",
+          "scheduled-frame",
+          "ready-callback",
+          "normal",
+        ]) {
+          const restores = [],
+            liveFrames = new Set(),
+            ownedListeners = [],
+            disposed = [],
+            disposedOwners = new Set(),
+            contexts = [],
+            observers = [];
+          const patch = (object, key, replacement) => {
+            const original = object[key];
+            object[key] = replacement(original);
+            restores.push(() => (object[key] = original));
+          };
+          const fail = () => {
+            throw new Error("Injected " + stage);
+          };
+          patch(
+            HTMLCanvasElement.prototype,
+            "getContext",
+            (original) =>
+              function (kind, ...args) {
+                const context = original.call(this, kind, ...args);
+                if (
+                  /webgl/.test(kind) &&
+                  context &&
+                  !contexts.some((entry) => entry.context === context)
+                ) {
+                  const entry = { context, loss: 0 };
+                  contexts.push(entry);
+                  const getExtension = context.getExtension.bind(context);
+                  context.getExtension = (name) => {
+                    const extension = getExtension(name);
+                    if (name === "WEBGL_lose_context" && extension) {
+                      const lose = extension.loseContext.bind(extension);
+                      extension.loseContext = () => {
+                        entry.loss++;
+                        lose();
+                      };
+                    }
+                    return extension;
+                  };
+                }
+                return context;
+              },
+          );
+          patch(
+            THREE.EventDispatcher.prototype,
+            "dispatchEvent",
+            (original) =>
+              function (event) {
+                if (event.type === "dispose") {
+                  disposed.push(this.type || this.constructor.name);
+                  disposedOwners.add(this);
+                }
+                return original.call(this, event);
+              },
+          );
+          patch(window, "requestAnimationFrame", (original) => (callback) => {
+            let id = original((now) => {
+              liveFrames.delete(id);
+              callback(now);
+            });
+            liveFrames.add(id);
+            return id;
+          });
+          patch(window, "cancelAnimationFrame", (original) => (id) => {
+            liveFrames.delete(id);
+            return original(id);
+          });
+          patch(
+            EventTarget.prototype,
+            "addEventListener",
+            (original) =>
+              function (type, handler, options) {
+                const result = original.call(this, type, handler, options);
+                if (
+                  this === window ||
+                  this === document ||
+                  this instanceof HTMLCanvasElement
+                )
+                  ownedListeners.push({ target: this, type, handler, options });
+                if (
+                  stage === "listeners" &&
+                  type === "keyup" &&
+                  this === window
+                )
+                  fail();
+                return result;
+              },
+          );
+          patch(
+            EventTarget.prototype,
+            "removeEventListener",
+            (original) =>
+              function (type, handler, options) {
+                const index = ownedListeners.findIndex(
+                  (item) =>
+                    item.target === this &&
+                    item.type === type &&
+                    item.handler === handler,
+                );
+                if (index >= 0) ownedListeners.splice(index, 1);
+                return original.call(this, type, handler, options);
+              },
+          );
+          patch(
+            window,
+            "ResizeObserver",
+            (Original) =>
+              class extends Original {
+                constructor(callback) {
+                  super(callback);
+                  this.connected = false;
+                  observers.push(this);
+                }
+                observe(target) {
+                  super.observe(target);
+                  this.connected = true;
+                  if (stage === "observer") fail();
+                }
+                disconnect() {
+                  super.disconnect();
+                  this.connected = false;
+                }
+              },
+          );
+          if (stage === "renderer")
+            patch(
+              host,
+              "append",
+              (original) =>
+                function (...nodes) {
+                  original.apply(this, nodes);
+                  fail();
+                },
+            );
+          if (stage === "partial-station")
+            patch(
+              THREE.Object3D.prototype,
+              "add",
+              (original) =>
+                function (...objects) {
+                  const result = original.apply(this, objects);
+                  if (
+                    objects.some(
+                      (object) => object.material?.map?.isCanvasTexture,
+                    )
+                  )
+                    fail();
+                  return result;
+                },
+            );
+          if (stage === "scheduled-frame") {
+            Object.defineProperty(host, "clientWidth", {
+              configurable: true,
+              get: fail,
+            });
+            restores.push(() => delete host.clientWidth);
+          }
+          let controller, error, memory;
+          try {
+            controller = createWorld(host, {
+              ...defaults,
+              onReady: stage === "ready-callback" ? fail : () => {},
+            });
+            if (stage === "normal") {
+              await new Promise((resolve) => setTimeout(resolve, 120));
+              memory = controller.getState().memory;
+              controller.update({ ...defaults, tasks: [] });
+              controller.dispose();
+              controller.dispose();
+            }
+          } catch (caught) {
+            error = caught.message;
+          }
+          const result = {
+            stage,
+            error: error || null,
+            memory,
+            uniqueDisposals: disposedOwners.size,
+            canvas: host.querySelectorAll("canvas").length,
+            listeners: ownedListeners.length,
+            observers: observers.filter((observer) => observer.connected)
+              .length,
+            frames: liveFrames.size,
+            disposed,
+            contextLoss: contexts.reduce((sum, entry) => sum + entry.loss, 0),
+          };
+          result.pass =
+            result.uniqueDisposals === result.disposed.length &&
+            result.canvas === 0 &&
+            result.listeners === 0 &&
+            result.observers === 0 &&
+            result.frames === 0 &&
+            result.contextLoss === 1 &&
+            (stage === "renderer" || result.disposed.length >= 9) &&
+            (stage === "normal" || !!error);
+          results.push(result);
+          restores.reverse().forEach((restore) => restore());
+        }
+        return results;
+      };
+      window.runPortalApproaches = async () => {
+        const results = [];
+        for (const [name, x, z, y] of [
+          ["front", 0, -28, 1],
+          ["back", 0, -30, -1],
+          ["left-edge", -4.09, -28, 1],
+          ["right-edge", 4.09, -30, -1],
+          ["around", 4.7, -28, 1],
+        ]) {
+          const original = THREE.Vector3.prototype.set;
+          THREE.Vector3.prototype.set = function (a, b, c) {
+            return original.call(
+              this,
+              a === 0 && b === 1.65 && c === 10 ? x : a,
+              b,
+              a === 0 && b === 1.65 && c === 10 ? z : c,
+            );
+          };
+          let controller;
+          try {
+            controller = createWorld(host, {
+              ...defaults,
+              tasks: [],
+              movement: { x: 0, y },
+            });
+          } finally {
+            THREE.Vector3.prototype.set = original;
+          }
+          await new Promise((resolve) => {
+            let frames = 0;
+            const sample = () => {
+              if (++frames >= 16) resolve();
+              else requestAnimationFrame(sample);
+            };
+            requestAnimationFrame(sample);
+          });
+          const state = controller.getState();
+          results.push({
+            name,
+            position: state.position,
+            pass:
+              name === "around"
+                ? state.position[2] < -28.3
+                : y === 1
+                  ? state.position[2] >= -28.2 - 1e-8
+                  : state.position[2] <= -29.8 + 1e-8,
+          });
+          controller.dispose();
+        }
+        return results;
+      };
+      window.startPortalCheck = () => {
+        // Travel near the far end uses the existing public controller contract.
+        window.props = {
+          ...defaults,
+          tasks: Array.from({ length: 12 }, (_, index) => ({
+            id: String(index),
+            text: "Task " + index,
+            completed: false,
+          })),
+          travelRequest: { id: "10", sequence: 1 },
+        };
+        window.world = createWorld(host, props);
+        world.update(props);
+        return world.getState();
+      };
+    </script>
+  </body>
+</html>

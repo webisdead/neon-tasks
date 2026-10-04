@@ -1,5 +1,11 @@
 @import "tailwindcss";
 :root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+:root {
   font-family: Arial, Helvetica, sans-serif;
   color: #eef8f7;
   background: #060c14;
@@ -76,15 +82,15 @@ button.primary {
 .hud-bottom,
 .entry-footer {
   position: absolute;
-  left: max(32px, env(safe-area-inset-left));
-  right: max(32px, env(safe-area-inset-right));
+  left: max(32px, var(--safe-left));
+  right: max(32px, var(--safe-right));
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 .hud-top {
-  top: max(24px, env(safe-area-inset-top));
+  top: max(24px, var(--safe-top));
 }
 .wordmark {
   font-size: 12px;
@@ -167,13 +173,13 @@ button.primary {
   margin-top: 18px;
 }
 .entry-footer {
-  bottom: max(25px, env(safe-area-inset-bottom));
+  bottom: max(25px, var(--safe-bottom));
   font: 9px monospace;
   letter-spacing: 2px;
   color: #899ea9;
 }
 .hud-bottom {
-  bottom: max(24px, env(safe-area-inset-bottom));
+  bottom: max(24px, var(--safe-bottom));
 }
 .hud-bottom button {
   font-size: 11px;
@@ -254,8 +260,8 @@ kbd {
   border: 1px solid #74919855;
   border-radius: 8px;
   padding: 28px;
-  width: min(560px, calc(100% - 32px));
-  max-height: calc(100dvh - 40px);
+  width: min(560px, calc(100% - 32px - var(--safe-left) - var(--safe-right)));
+  max-height: calc(100dvh - 40px - var(--safe-top) - var(--safe-bottom));
   overflow-y: auto;
   box-shadow: 0 30px 140px #000a;
   overscroll-behavior: contain;
@@ -484,9 +490,9 @@ kbd {
 }
 @media (pointer: coarse), (max-width: 600px) {
   .hud-top {
-    top: max(16px, env(safe-area-inset-top));
-    left: 16px;
-    right: 16px;
+    top: max(16px, var(--safe-top));
+    left: max(16px, var(--safe-left));
+    right: max(16px, var(--safe-right));
   }
   .wordmark {
     font-size: 10px;
@@ -530,9 +536,9 @@ kbd {
     text-align: right;
   }
   .hud-bottom {
-    left: 16px;
-    right: 16px;
-    bottom: max(16px, env(safe-area-inset-bottom));
+    left: max(16px, var(--safe-left));
+    right: max(16px, var(--safe-right));
+    bottom: max(16px, var(--safe-bottom));
   }
   .hud-bottom button {
     padding: 10px 12px;
@@ -543,9 +549,9 @@ kbd {
   .mobile-controls {
     display: flex;
     position: absolute;
-    left: 22px;
-    right: 22px;
-    bottom: 86px;
+    left: max(22px, var(--safe-left));
+    right: max(22px, var(--safe-right));
+    bottom: calc(86px + var(--safe-bottom));
     align-items: flex-end;
     justify-content: space-between;
     pointer-events: none;
@@ -583,7 +589,7 @@ kbd {
     font-size: 22px;
   }
   .target-action {
-    bottom: 222px;
+    bottom: calc(222px + var(--safe-bottom));
   }
   .target-action button {
     gap: 12px;
@@ -591,22 +597,24 @@ kbd {
   }
   .terminal {
     padding: 20px;
-    width: calc(100% - 24px);
-    max-height: calc(100dvh - 24px);
+    width: calc(100% - 24px - var(--safe-left) - var(--safe-right));
+    max-height: calc(100dvh - 24px - var(--safe-top) - var(--safe-bottom));
+    inset: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    margin: auto;
   }
   .dialog-heading h2 {
     font-size: 23px;
   }
   .graphics-status {
-    left: 16px;
-    right: 16px;
+    left: max(16px, var(--safe-left));
+    right: max(16px, var(--safe-right));
     bottom: 70px;
     max-width: none;
     font-size: 11px;
   }
   .storage-warning {
-    left: 16px;
-    right: 16px;
+    left: max(16px, var(--safe-left));
+    right: max(16px, var(--safe-right));
     bottom: 140px;
     font-size: 10px;
   }
@@ -657,7 +665,7 @@ kbd {
 }
 .terminal {
   margin: auto;
-  inset: 0;
+  inset: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 .hud-bottom .help-button span {
   font-size: 11px;
