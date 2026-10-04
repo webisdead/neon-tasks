@@ -53,4 +53,4 @@
 
 ### Abschluss
 - [x] Separate Task- und Gesamtprüfung, nötige Korrekturen und Abschlussprüfungen.
-- [ ] Geprüften Stand auf main veröffentlichen, Pages-Erfolg und Live-Welt prüfen.
+- [x] Geprüften Stand auf main veröffentlichen, Pages-Erfolg und Live-Welt prüfen.

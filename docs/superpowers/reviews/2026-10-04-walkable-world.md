@@ -22,4 +22,8 @@ Die Browserprüfungen verwenden Chromium mit Software-WebGL und emulierten Touch
 
 ## Veröffentlichung
 
-Die gezielte unabhängige Nachprüfung des Korrektur-Commits bestätigt alle vier Befunde als behoben und gibt den Stand frei. Der geprüfte Stand wird auf main übernommen; Pages-Workflow und Live-Prüfung werden vor Abschluss ergänzt.
+Die gezielte unabhängige Nachprüfung des Korrektur-Commits bestätigt alle vier Befunde als behoben und gibt den Stand frei. Der Stand wurde auf main übernommen und veröffentlicht.
+
+[Pages-Workflow 37214923008](https://github.com/webisdead/neon-tasks/actions/runs/37214923008) war erfolgreich (Build und Deployment). Die Live-Prüfung unter https://webisdead.github.io/neon-tasks/ bestätigte die aktuellen Produktions-Assets, WebGL bereit, Eintritt aus der Übersicht in die Ego-Perspektive, echte WASD-Kamerabewegung von z=10 nach z=9.4 und keinen Seitenscroll. Ein geöffneter Aufgaben-Dialog hält die Kamera exakt bei z=9.4 und fokussiert das Textfeld. Keine Browser-Laufzeitfehler.
+
+Die gezielten Korrekturbelege liegen unter [walkable-world-evidence](walkable-world-evidence/final-fix-report.md); temporäre Koordinationsdaten wurden nach Abschluss archiviert.
