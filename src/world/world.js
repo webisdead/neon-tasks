@@ -119,7 +119,8 @@ export function createWorld(host, initial) {
     scene.add(light);
     const floor = mesh(plane, floorMat, [0, 0, -9], [20, 46, 1]);
     floor.rotation.x = -Math.PI / 2;
-    mesh(box, dark, [0, -0.35, -9], [20, 0.7, 46]);
+    // Keep the slab top 3 cm below the walkable plane to avoid depth fighting.
+    mesh(box, dark, [0, -0.38, -9], [20, 0.7, 46]);
     const architectureObstacles = [
       { x: 0, z: -29, halfWidth: 4.1, halfDepth: 0.35 },
     ];

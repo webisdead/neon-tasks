@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+  <body style="margin: 0; background: #050912">
+    <script type="module">
+      import * as THREE from "/node_modules/three/build/three.module.js";
+      import { vertex, floorFragment } from "/src/world/shaders.js";
+      const legacy = `varying vec2 vUv; void main(){vec2 grid=abs(fract(vUv*vec2(20.,46.))-.5);float line=1.-smoothstep(.475,.49,max(grid.x,grid.y));vec3 c=vec3(.018,.027,.045)+vec3(.03,.17,.21)*line;float path=exp(-abs(vUv.x-.5)*45.);c+=vec3(.03,.12,.17)*path;gl_FragColor=vec4(c,1.);}`;
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        preserveDrawingBuffer: true,
+      });
+      renderer.setSize(900, 600);
+      document.body.append(renderer.domElement);
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("#050912");
+      const camera = new THREE.PerspectiveCamera(65, 1.5, 0.1, 90);
+      const floor = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 46),
+        new THREE.ShaderMaterial({
+          vertexShader: vertex,
+          fragmentShader: legacy,
+        }),
+      );
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.z = -9;
+      scene.add(floor);
+      const slab = new THREE.Mesh(
+        new THREE.BoxGeometry(20, 0.7, 46),
+        new THREE.MeshBasicMaterial({ color: "#111e2e" }),
+      );
+      slab.position.set(0, -0.35, -9);
+      scene.add(slab);
+      window.fixture = {
+        render({
+          separated = false,
+          aa = false,
+          only = "both",
+          far = false,
+          offset = 0,
+        } = {}) {
+          slab.position.y = separated ? -0.38 : -0.35;
+          floor.visible = only !== "slab";
+          slab.visible = only !== "floor";
+          floor.material.fragmentShader = aa ? floorFragment : legacy;
+          floor.material.needsUpdate = true;
+          camera.position.set(offset, far ? 0.3 : 1.7, 12);
+          camera.lookAt(offset, 0, far ? -30 : -6);
+          scene.updateMatrixWorld(true);
+          renderer.render(scene, camera);
+          const ray = new THREE.Raycaster(
+            new THREE.Vector3(0, 3, -9),
+            new THREE.Vector3(0, -1, 0),
+          );
+          const hits = ray.intersectObjects([floor, slab]);
+          return {
+            hits: hits.map((h) => ({
+              surface: h.object === floor ? "floor" : "slab",
+              y: h.point.y,
+              distance: h.distance,
+            })),
+            depth: {
+              floor: new THREE.Vector3(0, 0, -9).project(camera).z,
+              slab: new THREE.Vector3(0, slab.position.y + 0.35, -9).project(
+                camera,
+              ).z,
+            },
+            programs: renderer.info.programs.map((p) => ({
+              runnable: renderer
+                .getContext()
+                .getProgramParameter(
+                  p.program,
+                  renderer.getContext().LINK_STATUS,
+                ),
+            })),
+            renderer: renderer
+              .getContext()
+              .getParameter(renderer.getContext().RENDERER),
+            pixels: sample(),
+          };
+        },
+      };
+      function sample() {
+        const gl = renderer.getContext(),
+          p = new Uint8Array(900 * 600 * 4);
+        gl.readPixels(0, 0, 900, 600, gl.RGBA, gl.UNSIGNED_BYTE, p);
+        return Array.from(p.filter((_, i) => i % 4 !== 3));
+      }
+      // Reproducible manual variants: ?separated=1&aa=1&far=1&only=floor
+      const query = new URLSearchParams(location.search);
+      window.fixture.render({
+        separated: query.has("separated"),
+        aa: query.has("aa"),
+        far: query.has("far"),
+        only: query.get("only") || "both",
+      });
+    </script>
+  </body>
+</html>
