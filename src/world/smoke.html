@@ -1,0 +1,5 @@
+<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Courtyard smoke fixture</title><style>html,body,#world{margin:0;width:100%;height:100%;overflow:hidden}#world{position:absolute;inset:0}</style></head><body><div id="world"></div><script type="module">
+import {createWorld} from './world.js';
+window.events=[];window.props={tasks:Array.from({length:18},(_,i)=>({id:String(i),text:'Fokus '+i+' — nächsten Schritt planen',completed:i%3===0})),selectedId:'0',entered:true,paused:false,effectsEnabled:false,movement:{x:0,y:0},onReady:r=>events.push(['ready',r]),onTarget:t=>events.push(['target',t]),onCreate:()=>events.push(['create']),onPause:()=>events.push(['pause'])};
+window.world=createWorld(document.querySelector('#world'),props);
+</script></body></html>
