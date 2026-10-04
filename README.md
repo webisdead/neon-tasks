@@ -1,36 +1,29 @@
 # NEON / TASKS
 
-Eine mobile-first 3D-To-do-Liste mit deutscher Oberfläche, Three.js und eigenen GLSL-Shadern. Ein kristalliner Kern, Partikel und ein räumlicher Orbit visualisieren bis zu zwölf echte Aufgaben. Raum und Liste teilen dieselbe Auswahl; die Fokusansicht erlaubt direktes Erledigen und Wiederöffnen. Alle Aufgaben bleiben in der Liste erreichbar. Aufgaben hinzufügen (Enter oder Plus), abhaken, wieder öffnen, löschen und mit Alle / Offen / Erledigt filtern.
+Ein begehbarer Neon-Hof für deine Aufgaben. Die bildschirmfüllende Three.js-Welt hat echte Kamerabewegung, physische Aufgabenstationen und eigene GLSL-Effekte. Eine kleine Eintrittsansicht führt hinein; im Raum bleiben nur HUD, Zielaktion und mobile Steuerung sichtbar. Keine externen Grafik-Assets und keine Demo-Aufgaben.
 
-Bewegung startet gemäß `prefers-reduced-motion` und lässt sich mit dem sichtbaren Schalter ausdrücklich an- oder ausschalten. Ohne WebGL, bei Kontextverlust oder beim Fehler des lazy geladenen Grafikmoduls bleiben Eingabe und Aufgabenliste nutzbar. Die Szene pausiert im Hintergrund, begrenzt die Pixeldichte auf 1.5 und aktualisiert projizierte Labels höchstens 12.5-mal pro Sekunde. Keine externen Grafik-Assets.
+WASD oder Pfeiltasten bewegen dich, Ziehen mit der Maus dreht den Blick. Optional aktiviert „Maus umsehen“ Pointer Lock. E oder die Zielaktion öffnet eine nahe Station. Auf Smartphones bewegst du dich mit dem Stick und siehst dich durch Wischen um. Escape, Dialoge, Fokusverlust und versteckte Tabs pausieren die Navigation. Das Hilfe-Menü erklärt die Steuerung und führt zum Eingang zurück.
 
-## Start
+„Aufgaben“ öffnet das Terminal mit allen Aufgaben und den Filtern Alle / Offen / Erledigt. Aufgaben lassen sich erstellen, erledigen, wieder öffnen und löschen; der Detaildialog zeigt vollständige Texte. „Im Raum finden“ führt auch zu älteren Aufgaben. Höchstens zwölf tatsächliche Aufgabenstationen erscheinen gleichzeitig. Der Erstellpunkt bleibt auch im leeren Raum verfügbar.
+
+Ambient-Effekte starten entsprechend `prefers-reduced-motion` und lassen sich im Pause-Menü umschalten. Bewusste Navigation bleibt immer möglich. Ohne Ambient-Effekte und aktive Bewegung stoppt die Render-Schleife. Die Pixeldichte ist auf 1.5 begrenzt. Ohne WebGL, bei Kontextverlust oder einem Fehler des Grafikmoduls bleiben alle Aufgaben im Terminal erreichbar.
+
+## Lokal starten
 
 ```sh
 npm install
-npm run dev -- --host 0.0.0.0 --port 5173
-```
-
-Die App ist unter http://localhost:5173 erreichbar. Aus der Arbeitsumgebung: http://<Host-IP>:5173.
-
-```sh
+npm run dev -- --port 5173
 npm test
-npm run build
-```
-
-Aufgaben werden ausschließlich im Browser unter `neon-tasks:v1` gespeichert. Bei blockiertem Speicher bleibt die App im aktuellen Tab nutzbar und zeigt einen Hinweis. Ungültige gespeicherte Daten werden als leere Liste behandelt. Ohne vorgefertigte Aufgaben, Login oder Datenserver.
-
-## GitHub Pages
-
-Deployment-Adresse: https://webisdead.github.io/neon-tasks/
-
-Unter **Settings → Pages → Build and deployment → Source** im Repository **GitHub Actions** auswählen. Der Workflow `.github/workflows/deploy-pages.yml` installiert mit `npm ci`, führt die Tests aus und veröffentlicht den Vite-Build bei jedem Push auf `main`. Er kann auch unter **Actions → Deploy to GitHub Pages → Run workflow** manuell gestartet werden.
-
-Produktions-Builds verwenden den Projektpfad `/neon-tasks/`; der lokale Entwicklungsserver bleibt unter `/` erreichbar. Den Produktions-Build lokal prüfen:
-
-```sh
 npm run build
 npm run preview -- --port 4173
 ```
 
-Die Vorschau ist unter http://localhost:4173/neon-tasks/ erreichbar.
+Entwicklung: http://localhost:5173/. Produktionsvorschau: http://localhost:4173/neon-tasks/.
+
+Aufgaben werden ausschließlich im Browser unter `neon-tasks:v1` gespeichert. IDs, Text und Erledigt-Status bleiben erhalten. Bei blockiertem Speicher bleibt die App im aktuellen Tab nutzbar und zeigt einen Hinweis. Ungültige gespeicherte Daten werden als leere Liste behandelt. Ohne Login oder Datenserver.
+
+## GitHub Pages
+
+Deployment: https://webisdead.github.io/neon-tasks/
+
+Unter **Settings → Pages → Build and deployment → Source** im Repository **GitHub Actions** auswählen. `.github/workflows/deploy-pages.yml` installiert mit `npm ci`, führt Tests und Build aus und veröffentlicht bei jedem Push auf `main`. Der Workflow lässt sich auch manuell starten. Der Produktionspfad ist `/neon-tasks/`.
